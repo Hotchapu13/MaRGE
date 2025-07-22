@@ -16,6 +16,7 @@ import configs.hw_config as hw
 import autotuning.autotuning as autotuning # Just to use an arduino
 import threading
 
+import os
 
 class MarcosController(MarcosToolBar):
     """
@@ -40,12 +41,32 @@ class MarcosController(MarcosToolBar):
         """
         super(MarcosController, self).__init__(*args, **kwargs)
 
+        # Get the directory where this file is located
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up to MaRGE directory, then up one more to reach marcos_extras
+        marcos_extras_dir = os.path.join(current_dir, "..", "..", "marcos_extras")
+        marge_dir = os.path.join(current_dir, "..")
+
         # Copy relevant files from marcos_extras
-        shutil.copy("../marcos_extras/copy_bitstream.sh", "../MaRGE")
-        shutil.copy("../marcos_extras/marcos_fpga_rp-122.bit", "../MaRGE")
-        shutil.copy("../marcos_extras/marcos_fpga_rp-122.bit.bin", "../MaRGE")
-        shutil.copy("../marcos_extras/marcos_fpga_rp-122.dtbo", "../MaRGE")
-        shutil.copy("../marcos_extras/readme.org", "../MaRGE")
+        try:
+            shutil.copy(os.path.join(marcos_extras_dir, "copy_bitstream.sh"), marge_dir)
+            shutil.copy(os.path.join(marcos_extras_dir, "marcos_fpga_rp-122.bit"), marge_dir)
+            shutil.copy(os.path.join(marcos_extras_dir, "marcos_fpga_rp-122.bit.bin"), marge_dir)
+            shutil.copy(os.path.join(marcos_extras_dir, "marcos_fpga_rp-122.dtbo"), marge_dir)
+            shutil.copy(os.path.join(marcos_extras_dir, "readme.org"), marge_dir)
+            print("READY: MaRCoS files copied successfully.")
+        except FileNotFoundError as e:
+            print(f"ERROR: Could not find required MaRCoS files: {e}")
+            print(f"Looking in: {marcos_extras_dir}")
+        except Exception as e:
+            print(f"ERROR: Failed to copy MaRCoS files: {e}")
+
+        # Copy relevant files from marcos_extras
+        # shutil.copy("../marcos_extras/copy_bitstream.sh", "../MaRGE")
+        # shutil.copy("../marcos_extras/marcos_fpga_rp-122.bit", "../MaRGE")
+        # shutil.copy("../marcos_extras/marcos_fpga_rp-122.bit.bin", "../MaRGE")
+        # shutil.copy("../marcos_extras/marcos_fpga_rp-122.dtbo", "../MaRGE")
+        # shutil.copy("../marcos_extras/readme.org", "../MaRGE")
 
         self.action_server.setCheckable(True)
         self.action_start.triggered.connect(self.startMaRCoS)
